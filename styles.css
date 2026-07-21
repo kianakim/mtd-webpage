@@ -264,7 +264,7 @@ body {
   flex-shrink: 0;
   border-radius: 8px;
   border: 2px solid var(--purple-dark);
-  background: linear-gradient(160deg, var(--sage), var(--mustard));
+  background: url('assets/image01.gif') center/cover;
   display: flex;
   align-items: center;
   justify-content: center;
