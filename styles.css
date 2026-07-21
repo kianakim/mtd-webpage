@@ -107,9 +107,15 @@ body {
   margin-bottom: 14px;
 }
 .about__text {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  margin: 0;
+  background: linear-gradient(90deg, var(--text-on-cream) 40%, var(--mustard) 50%, var(--text-on-cream) 60%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+@keyframes shimmer {
+  to { background-position: -200% center; }
 }
 
 /* LINKS */
