@@ -19,9 +19,13 @@
 
 body {
   margin: 0;
-  font-family: var(--font-body);
+  min-height: 100vh;
   background: var(--purple-dark);
-  color: var(--text-on-dark);
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  font-family: 'Nunito', sans-serif;
 }
 
 .page {
@@ -184,4 +188,176 @@ body {
 /* REDUCED MOTION */
 @media (prefers-reduced-motion: reduce) {
   .btn, .link-card { transition: none; }
+}
+
+* { box-sizing: border-box; }
+
+/* Wrapper for this section — centers the card with breathing room above/below */
+.status-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+/* ---- Card shell with pixel-corner bracket frame ---- */
+.status-card {
+  position: relative;
+  width: min(480px, 100%);
+  background: var(--cream);
+  border: 3px solid var(--mauve);
+  border-radius: 4px;
+  padding: 28px 24px 24px;
+  opacity: 0;
+  transform: translateY(16px);
+  animation: card-in 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes card-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Pixel-style corner brackets, drawn with borders for a hard-edged retro look */
+.status-card::before,
+.status-card::after,
+.status-card__br-tr,
+.status-card__br-bl {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 3px solid var(--purple-dark);
+}
+.status-card::before { top: -3px; left: -3px; border-right: none; border-bottom: none; }
+.status-card::after   { bottom: -3px; right: -3px; border-left: none; border-top: none; }
+.status-card__br-tr  { top: -3px; right: -3px; border-left: none; border-bottom: none; }
+.status-card__br-bl  { bottom: -3px; left: -3px; border-right: none; border-top: none; }
+
+/* Level badge clipped to the top-left, like a JRPG status screen */
+.level-badge {
+  position: absolute;
+  top: -16px;
+  left: 22px;
+  background: var(--purple-dark);
+  color: var(--mustard);
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 2px solid var(--mauve);
+}
+
+.status-card__header {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+/* Portrait window — replace this gradient with a real avatar crop, e.g.:
+   background: url('assets/avatar.png') center/cover; */
+.portrait {
+  width: 84px;
+  height: 84px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 2px solid var(--purple-dark);
+  background: linear-gradient(160deg, var(--sage), var(--mustard));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 1.6rem;
+  color: var(--purple-dark);
+  font-weight: 700;
+}
+
+.identity__name {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--purple-dark);
+  margin: 0;
+}
+
+.identity__class {
+  font-size: 0.8rem;
+  color: var(--text-on-cream-soft);
+  margin: 2px 0 0;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--cream-line);
+  margin: 0 0 18px;
+}
+
+/* ---- Stat rows with segmented pip bars ---- */
+.stat-row {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.stat-row__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text-on-cream);
+}
+
+.pip-bar {
+  display: flex;
+  gap: 3px;
+}
+
+.pip {
+  flex: 1;
+  height: 12px;
+  background: var(--cream-line);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.pip.filled {
+  background: var(--pip-color, var(--sage));
+  animation: pip-fill 0.15s ease-out forwards;
+  animation-delay: var(--pip-delay, 0s);
+}
+
+@keyframes pip-fill {
+  to { transform: scaleX(1); }
+}
+
+/* Each stat row gets its own pip color — add more nth-child rules if you add rows */
+.stat-row:nth-child(1) .pip.filled { --pip-color: var(--sage); }
+.stat-row:nth-child(2) .pip.filled { --pip-color: var(--mustard); }
+.stat-row:nth-child(3) .pip.filled { --pip-color: var(--mauve); }
+.stat-row:nth-child(4) .pip.filled { --pip-color: #b98ea6; }
+
+.flavor-text {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--cream-line);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text-on-cream-soft);
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-card { animation: none; opacity: 1; transform: none; }
+  .pip.filled { animation: none; transform: scaleX(1); }
+}
+
+@media (max-width: 380px) {
+  .stat-row { grid-template-columns: 78px 1fr; }
+  .stat-row__label { font-size: 0.62rem; }
 }
