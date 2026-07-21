@@ -352,11 +352,6 @@ body {
   text-align: center;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .status-card { animation: none; opacity: 1; transform: none; }
-  .pip.filled { animation: none; transform: scaleX(1); }
-}
-
 @media (max-width: 380px) {
   .stat-row { grid-template-columns: 78px 1fr; }
   .stat-row__label { font-size: 0.62rem; }
