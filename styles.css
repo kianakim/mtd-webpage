@@ -45,7 +45,7 @@ body {
   width: 80%;
   margin-bottom: 16px;
   filter: 
-    drop-shadow(8px 8px 0 rgba(0,0,0,0.4));
+    drop-shadow(8px 8px 0 rgba(0,0,0,0.4))
     drop-shadow(0 8px 16px rgba(0,0,0,0.3));
   transition: transform 0.2s ease, filter 0.2s ease;
 }
@@ -53,7 +53,7 @@ body {
 .hero__logo:hover {
   transform: scale(1.05) rotate(-1deg);
   filter:
-    drop-shadow(4px 4px 0 rgba(0,0,0,0.4))
+    drop-shadow(8px 8px 0 rgba(0,0,0,0.4))
     drop-shadow(0 12px 24px rgba(0,0,0,0.4));
 }
 
@@ -206,6 +206,9 @@ body {
 /* REDUCED MOTION */
 @media (prefers-reduced-motion: reduce) {
   .btn, .link-card { transition: none; }
+  .status-card { animation: none; opacity: 1; transform: none; }
+  .pip.filled { animation: none; transform: scaleX(1); }
+  .about__text { animation: none; color: var(--text-on-cream); }
 }
 
 * { box-sizing: border-box; }
