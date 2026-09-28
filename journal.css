@@ -1,0 +1,428 @@
+/* journal.css -- open-book journal section (vertical marker tabs).
+   Link it AFTER styles.css:  <link rel="stylesheet" href="journal.css" /> */
+
+/* Everything here is scoped to .journal / .journal__* so it cannot collide with the site's CSS. */
+.journal, .journal * { box-sizing: border-box; }
+
+.journal {
+  --purple-dark: #2f2a4a;
+  --cover: #80477e;            /* sampled from the template's cover */
+  --cover-hi: #955e91;
+  --page: #ffd7a8;             /* the template's page color */
+  --page-line: #e8be8c;
+  --card-fill: #fff3de;
+  --outline: #3a3551;
+  --body-text: #5a3f45;
+  --body-soft: #8a6a62;
+  --cream: #f0e9db;
+  --sage: #9ad6c2;
+  --mustard: #e8c95a;
+  --rose: #b98ea6;
+  --mauve: #c9a8a0;
+
+  --font-pixel: 'Pixelify Sans', 'Courier New', monospace;
+
+  /* --k scales the book frame art (1 = the template's native size).
+     Frame slices are 80/80/100/80 px in the source image. The template's own
+     pixel grid is ~3.46px per art pixel, so k = 0.578 makes one art pixel
+     exactly 2px on screen -- the same grid the marker sprite uses (--tpx). */
+  --k: 0.578;
+  --frame-t: calc(80px * var(--k));
+  --frame-r: calc(80px * var(--k));
+  --frame-b: calc(100px * var(--k));
+  --frame-l: calc(80px * var(--k));
+  --side-band: calc(53px * var(--k));   /* width of the cover band on the left/right edge */
+  --spine-w: calc(88px * var(--k));
+
+  /* One "art pixel" for the small sprites (tabs, cards). The template's own
+     pixels come out at ~3.5px on screen at --k 0.5, so 3px sits well with it. */
+  --px: 3px;
+  --cpx: 2px;
+  --tpx: 2px;                      /* one art pixel of the marker sprite (20x15 source) */
+
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 56px;   /* also leaves room for the tabs that stick out past the cover */
+  font-family: var(--font-pixel);
+  color: var(--body-text);
+}
+
+/* ---- Tabs: your Marker01a, rotated to stick out of the right edge ----
+   marker-right.png is the pack's tallest marker frame turned 90deg clockwise (15x20).
+   Its slices, top/right/bottom/left = 3/3/3/1: the 1px left edge is the peach lip that
+   merges into the page. Thickness animates with the pack's own bounce pattern
+   (idle I, I-1, S+1, S). Idle = 15 rows (as drawn in your mockup), selected = 17. */
+.journal__tabs {
+  position: absolute;
+  z-index: 3;                    /* above the spine and page content */
+  top: calc(6 * var(--tpx));
+  /* lip lands on the flat page edge: past the padding box by (frame - side-band) */
+  left: calc(100% + var(--frame-r) - var(--side-band));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;       /* every tab is anchored to the page edge */
+  gap: calc(3 * var(--tpx));
+}
+
+.journal__tab {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: calc(15 * var(--tpx));                       /* idle */
+  height: calc(22 * var(--tpx));
+  padding: 0;
+  background: none;
+  border-style: solid;
+  border-width: calc(3 * var(--tpx)) calc(3 * var(--tpx)) calc(3 * var(--tpx)) var(--tpx);
+  border-image: url('assets/journal/marker-right.png') 3 3 3 1 fill / calc(3 * var(--tpx)) calc(3 * var(--tpx)) calc(3 * var(--tpx)) var(--tpx) stretch;
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+
+.journal__tab[aria-selected="true"] {
+  width: calc(17 * var(--tpx));                       /* selected */
+}
+
+.journal__tab[aria-selected="false"]:hover {
+  width: calc(16 * var(--tpx));                       /* peeks out one row */
+}
+
+.journal__tab:focus-visible {
+  outline: var(--tpx) solid var(--mustard);
+  outline-offset: 2px;
+}
+
+/* Icons: plain pixel PNGs (dark = idle, pale = current, both sampled from your mockup).
+   Regular background images, so they also load when index.html is opened from a folder. */
+.journal__tab-icon {
+  display: block;
+  width: calc(var(--iw) * var(--tpx));
+  height: calc(var(--ih) * var(--tpx));
+  margin-left: calc(-1 * var(--tpx));                 /* icons start on the lip, as in the mockup */
+  background: var(--icon) center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+.journal__tab[aria-selected="true"] .journal__tab-icon { background-image: var(--icon-cur); }
+
+.journal__tab[data-icon="home"]  { --icon: url('assets/journal/icons/home.png');  --icon-cur: url('assets/journal/icons/home-current.png');  --iw: 11; --ih: 10; }
+.journal__tab[data-icon="bolt"]  { --icon: url('assets/journal/icons/bolt.png');  --icon-cur: url('assets/journal/icons/bolt-current.png');  --iw: 10; --ih: 11; }
+.journal__tab[data-icon="heart"] { --icon: url('assets/journal/icons/heart.png'); --icon-cur: url('assets/journal/icons/heart-current.png'); --iw: 11; --ih: 9;  }
+.journal__tab[data-icon="star"]  { --icon: url('assets/journal/icons/star.png');  --icon-cur: url('assets/journal/icons/star-current.png');  --iw: 11; --ih: 9;  }
+
+/* Icon-only tabs get a small label on hover/focus, drawn over the page to the left */
+.journal__tab-tip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 4 * var(--tpx));
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-family: var(--font-pixel);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+  background: #493333;
+  padding: 3px 9px;
+  box-shadow:
+    0 calc(-1 * var(--tpx)) 0 0 #493333,
+    0 var(--tpx) 0 0 #493333,
+    calc(-1 * var(--tpx)) 0 0 0 #493333,
+    var(--tpx) 0 0 0 #493333;
+  opacity: 0;
+  pointer-events: none;
+}
+.journal__tab:hover .journal__tab-tip,
+.journal__tab:focus-visible .journal__tab-tip { opacity: 1; }
+
+/* The pack's 4-frame bounce, in rows of thickness (idle 15, selected 17):
+   show 15 > 14 > 18 > 17     hide 17 > 18 > 14 > 15
+   script.js adds .is-showing / .is-hiding only when the selection changes. */
+.journal__tab.is-showing { animation: journal-marker-show 0.28s step-end both; }
+.journal__tab.is-hiding  { animation: journal-marker-hide 0.28s step-end both; }
+
+@keyframes journal-marker-show {
+  0%   { width: calc(15 * var(--tpx)); }
+  25%  { width: calc(14 * var(--tpx)); }
+  50%  { width: calc(18 * var(--tpx)); }
+  75%  { width: calc(17 * var(--tpx)); }
+  100% { width: calc(17 * var(--tpx)); }
+}
+@keyframes journal-marker-hide {
+  0%   { width: calc(17 * var(--tpx)); }
+  25%  { width: calc(18 * var(--tpx)); }
+  50%  { width: calc(14 * var(--tpx)); }
+  75%  { width: calc(15 * var(--tpx)); }
+  100% { width: calc(15 * var(--tpx)); }
+}
+
+/* ---- The book: 9-slice frame cut from your template ---- */
+.journal__book {
+  position: relative;
+  z-index: 1;
+  border-style: solid;
+  border-width: var(--frame-t) var(--frame-r) var(--frame-b) var(--frame-l);
+  border-image: url('assets/journal/book-frame.png') 80 80 100 80 fill / var(--frame-t) var(--frame-r) var(--frame-b) var(--frame-l) round;
+  padding: 0 calc(6 * var(--px)) calc(2 * var(--px));
+  min-height: 680px;            /* matches the About Me spread so the book doesn't jump between tabs */
+}
+
+/* Binding, built from the template in three pieces. The middle line only fills the
+   inner page area; the top and bottom notches overlap the cover band at each end.
+   (Keeping the middle out of the border area stops it poking past the cover.) */
+.journal__spine {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: var(--spine-w);
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: url('assets/journal/spine-mid.png') center / 100% auto repeat-y;
+}
+.journal__spine::before,
+.journal__spine::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: calc(130px * var(--k));
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.journal__spine::before { top: calc(-1 * var(--frame-t)); background-image: url('assets/journal/spine-top.png'); }
+.journal__spine::after  { bottom: calc(-1 * var(--frame-b)); background-image: url('assets/journal/spine-bottom.png'); }
+
+/* Panels turn in with a stepped, low-frame-rate fade */
+.journal__panel:not([hidden]) {
+  animation: journal-page-in 0.24s steps(4) both;
+}
+@keyframes journal-page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Two-page spread ---- */
+.journal__spread {
+  position: relative;
+  z-index: 2;                                   /* content sits above the spine overlay */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: calc(var(--spine-w) + 28px);      /* clears the binding */
+  padding: 8px 4px 12px;
+}
+.journal__page { min-width: 0; }
+
+.journal__title {
+  display: flex;
+  align-items: center;
+  height: 44px;                                 /* right page uses the same height as an offset */
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--outline);
+  margin: 0 0 12px;
+}
+.journal__page--offset { padding-top: 56px; }            /* 44px title + 12px margin */
+
+.journal__note {
+  color: var(--body-soft);
+  margin: 0;
+}
+
+/* ---- About Me: left page ---- */
+.journal__portrait {
+  margin: 0 auto 16px;
+  max-width: 300px;
+  border-style: solid;
+  border-width: calc(4 * var(--px));
+  border-image: url('assets/journal/card-frame.png') 4 fill / calc(4 * var(--px)) stretch;
+  image-rendering: pixelated;
+}
+.journal__portrait img,
+.journal__portrait-placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  image-rendering: auto;         /* smooth art stays smooth; change to pixelated for pixel-art characters */
+}
+.journal__portrait-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 0.95rem;
+  color: var(--body-soft);
+  background: repeating-linear-gradient(45deg, var(--page-line) 0 6px, var(--card-fill) 6px 12px);
+}
+.journal__portrait-placeholder span {
+  background: var(--card-fill);
+  padding: 2px 8px;
+}
+
+.journal__identity { text-align: center; }
+.journal__name {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--outline);
+  margin: 0;
+}
+
+/* Pixel-notched badge/chips: stepped box-shadows give chopped corners without border-radius */
+.journal__level {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--mustard);
+  background: var(--cover);
+  padding: 4px 12px;
+  margin: 14px var(--px);
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--outline),
+    0 var(--px) 0 0 var(--outline),
+    calc(-1 * var(--px)) 0 0 0 var(--outline),
+    var(--px) 0 0 0 var(--outline);
+}
+
+.journal__chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: calc(3 * var(--px));
+  list-style: none;
+  padding: 0 var(--px);
+  margin: 4px 0 0;
+}
+.journal__chips li {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--outline);
+  background: var(--sage);
+  padding: 2px 10px;
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--outline),
+    0 var(--px) 0 0 var(--outline),
+    calc(-1 * var(--px)) 0 0 0 var(--outline),
+    var(--px) 0 0 0 var(--outline);
+}
+
+/* ---- About Me: right page stat cards ---- */
+.journal__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 10px;
+}
+.journal__stat {
+  border-style: solid;
+  border-width: calc(4 * var(--cpx));
+  border-image: url('assets/journal/card-frame.png') 4 fill / calc(4 * var(--cpx)) stretch;
+  image-rendering: pixelated;
+  padding: 2px 4px 6px;
+}
+.journal__stat h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--outline);
+  margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: var(--cpx) solid var(--card-accent, var(--mauve));
+}
+.journal__stat h3::before {
+  content: "";
+  width: calc(3 * var(--cpx));
+  height: calc(3 * var(--cpx));
+  background: var(--card-accent, var(--mauve));
+  box-shadow: 0 0 0 var(--cpx) var(--outline);
+  margin-right: 2px;
+}
+.journal__stat ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.journal__stat li {
+  padding-left: 1.3em;      /* hanging indent so wrapped lines align under the text */
+  text-indent: -1.3em;
+}
+.journal__stat li::before {
+  content: "▸";
+  display: inline-block;
+  width: 1.3em;
+  text-indent: 0;
+  color: var(--card-accent, var(--mauve));
+}
+.journal__stat--likes      { --card-accent: #5fb89c; }
+.journal__stat--dislikes   { --card-accent: var(--rose); }
+.journal__stat--strengths  { --card-accent: #d9a92c; }
+.journal__stat--weaknesses { --card-accent: var(--cover-hi); }
+
+/* ---- Friends: locked slots, two per page ---- */
+.journal__friends {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.journal__friend {
+  text-align: center;
+  border-style: solid;
+  border-width: calc(4 * var(--cpx));
+  border-image: url('assets/journal/card-frame.png') 4 fill / calc(4 * var(--cpx)) stretch;
+  image-rendering: pixelated;
+  padding: 4px 4px 8px;
+}
+.journal__friend-silhouette {
+  aspect-ratio: 1;
+  background: var(--outline);
+  opacity: 0.55;
+  color: var(--cream);
+  font-size: 2.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.journal__friend h3 {
+  font-size: 1rem;
+  color: var(--body-soft);
+  margin: 0 0 4px;
+}
+.journal__friend-desc {
+  min-height: 3em;
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--body-soft);
+}
+
+/* ---- Narrow screens: the open book becomes a single page ---- */
+@media (max-width: 760px) {
+  .journal { --k: 0.4; --px: 2px; --cpx: 2px; }
+
+  .journal__spine { display: none; }
+  .journal__book { padding: 0 calc(3 * var(--px)) var(--px); min-height: 0; }
+  .journal__spread { grid-template-columns: 1fr; row-gap: 20px; padding: 4px 0 8px; }
+  .journal__page--offset { padding-top: 0; }
+
+  /* dashed "fold" between what used to be the two pages */
+  .journal__page--right { border-top: 2px dashed var(--page-line); padding-top: 20px; }
+
+  .journal__portrait { max-width: 220px; }
+  .journal__stats { grid-template-columns: 1fr; }
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  .journal__panel:not([hidden]) { animation: none; }
+  .journal__tab.is-showing,
+  .journal__tab.is-hiding { animation: none; }
+}
